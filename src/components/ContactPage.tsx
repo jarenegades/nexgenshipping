@@ -36,8 +36,8 @@ export function ContactPage() {
         <div className="max-w-3xl">
           <h1 className="mb-4">Get In Touch</h1>
           <p className="text-lg md:text-xl text-red-100 leading-relaxed">
-            Have questions? We're here to help! Our dedicated support team is ready to assist you 
-            with orders, product information, or any other inquiries.
+            Need help identifying a bearing or component? The Max Bearings support team can assist with orders, product 
+            information and general sourcing questions.
           </p>
         </div>
       </div>
@@ -50,7 +50,7 @@ export function ContactPage() {
           </div>
           <h3 className="text-[#003366] mb-2">Call Us</h3>
           <p className="text-gray-600 text-sm mb-3">
-            Available for customer support
+            Speak with Max Bearings support
           </p>
           <a href="tel:+16896801264" className="text-[#DC143C] hover:underline font-semibold">
             (689) 680-1264
@@ -63,10 +63,10 @@ export function ContactPage() {
           </div>
           <h3 className="text-[#003366] mb-2">Email Us</h3>
           <p className="text-gray-600 text-sm mb-3">
-            Response within 24 hours
+            Max Bearings typically responds within 24 hours
           </p>
-          <a href="mailto:info@nexgenshipping.com" className="text-[#FF9900] hover:underline font-semibold break-all">
-            info@nexgenshipping.com
+          <a href="mailto:info@maxbearingsja.com" className="text-[#FF9900] hover:underline font-semibold break-all">
+            info@maxbearingsja.com
           </a>
         </div>
 
@@ -76,15 +76,15 @@ export function ContactPage() {
           </div>
           <h3 className="text-[#003366] mb-2">Follow Us</h3>
           <p className="text-gray-600 text-sm mb-3">
-            Connect on Instagram
+            Follow Max Bearings on Instagram
           </p>
           <a 
-            href="https://instagram.com/ship.nexgen" 
+            href="https://instagram.com/maxbearingsja" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-[#003366] hover:underline font-semibold"
           >
-            @ship.nexgen →
+            @maxbearingsja →
           </a>
         </div>
       </div>
@@ -200,15 +200,15 @@ export function ContactPage() {
         <div className="space-y-6">
           {/* Office Info */}
           <div className="bg-gradient-to-br from-blue-50 to-red-50 rounded-lg p-6 md:p-8">
-            <h3 className="text-[#003366] mb-6">Company Information</h3>
+            <h3 className="text-[#003366] mb-6">Max Bearings Information</h3>
             
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-[#DC143C] mt-1 shrink-0" />
                 <div>
-                  <p className="font-semibold text-[#003366] mb-1">Headquarters</p>
+                  <p className="font-semibold text-[#003366] mb-1">Max Bearings Distribution</p>
                   <p className="text-gray-700 text-sm">
-                    Florida, United States<br />
+                    Ocho Rios, St. Ann, Jamaica<br />
                     Serving customers worldwide
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export function ContactPage() {
                   <p className="text-gray-700 text-sm">
                     24/7 Online Ordering Available<br />
                     Customer Support During Business Hours<br />
-                    Visit: www.nexgenshipping.com
+                    Visit: www.maxbearingsja.com
                   </p>
                 </div>
               </div>
@@ -233,12 +233,12 @@ export function ContactPage() {
 
           {/* About Our Service */}
           <div className="bg-[#DC143C] text-white rounded-lg p-6">
-            <h3 className="mb-2">About Our Service</h3>
+            <h3 className="mb-2">About Max Bearings</h3>
             <p className="text-sm text-red-100 mb-3">
-              Established in 2024 with over 20 years of collective experience in logistics and distribution
+              An industrial component supplier backed by practical distribution experience and responsive service.
             </p>
             <p className="text-sm text-red-100">
-              We specialize in OTC medicines, vitamins, baby products, and worldwide delivery services.
+              Max Bearings specializes in rolling bearings, mounted units, linear motion components and worldwide delivery.
             </p>
           </div>
         </div>

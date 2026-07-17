@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { toast } from 'sonner';
 import { authService } from '../utils/authService';
 import { config } from '../utils/config';
-import logoImage from '../assets/nexgen-logo-new.png';
+const logoImage = '/Max%20Bearings%20Logo.png';
 
 interface LoginDialogProps {
   open: boolean;
@@ -79,7 +79,7 @@ export function LoginDialog({ open, onOpenChange, onLogin }: LoginDialogProps) {
         }
       } else {
         // Mock authentication (fallback)
-        if (signInEmail === 'admin@nexgenshipping.net' && signInPassword === 'admin123') {
+        if (signInEmail === 'admin@maxbearingsja.com' && signInPassword === 'admin123') {
           onLogin(signInEmail, true);
           toast.success('Welcome back, Admin!');
         } else {
@@ -206,9 +206,9 @@ export function LoginDialog({ open, onOpenChange, onLogin }: LoginDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex justify-center mb-4">
-            <img src={logoImage} alt="NEX-GEN Shipping Agency" className="h-16 w-auto" />
+            <img src={logoImage} alt="Max Bearings" className="h-20 w-auto" />
           </div>
-          <DialogTitle className="text-center text-[#003366]">Welcome to NEX-GEN Shipping</DialogTitle>
+          <DialogTitle className="text-center text-[#003366]">Welcome to Max Bearings</DialogTitle>
           <DialogDescription className="text-center">
             Sign in or create an account to start shopping
           </DialogDescription>
@@ -272,7 +272,7 @@ export function LoginDialog({ open, onOpenChange, onLogin }: LoginDialogProps) {
               {!config.useSupabase && (
                 <div className="text-center text-xs text-gray-600 mt-2">
                   <div>Demo mode: Use any email/password</div>
-                  <div className="text-[#DC143C]">Admin: admin@nexgenshipping.net / admin123</div>
+                  <div className="text-[#DC143C]">Administrator access is available by invitation.</div>
                 </div>
               )}
             </form>

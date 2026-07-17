@@ -20,29 +20,26 @@ export interface ProductCategory {
 
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
   {
-    name: 'Pharmaceutical Products',
+    name: 'Rolling Bearings',
     id: 'pharmaceutical',
     categories: [
-      { name: 'Cold, Cough, Allergy & Sinus', id: 'cold-cough-allergy-sinus' },
-      { name: 'Rubs & Ointments', id: 'rubs-ointments' },
-      { name: 'Eye Care', id: 'eye-care' },
-      { name: 'First Aid', id: 'first-aid' },
-      { name: 'Condom & Accessories', id: 'condom-accessories' },
-      { name: 'Energy Tabs & Vitamins', id: 'energy-tabs-vitamins' },
-      { name: 'Dental Care', id: 'dental-care' },
-      { name: 'Feminine Care', id: 'feminine-care' },
-      { name: 'Pest Control & Repellant', id: 'pest-control-repellant' },
-      { name: 'Stomach Meds', id: 'stomach-meds' },
-      { name: 'OTC Medicines', id: 'otc-medicines' },
-      { name: 'Lip Care', id: 'lip-care' },
+      { name: 'Deep Groove Ball Bearings', id: 'deep-groove-ball-bearings' },
+      { name: 'Angular Contact Ball Bearings', id: 'angular-contact-ball-bearings' },
+      { name: 'Self-Aligning Ball Bearings', id: 'self-aligning-ball-bearings' },
+      { name: 'Spherical Roller Bearings', id: 'spherical-roller-bearings' },
+      { name: 'Cylindrical Roller Bearings', id: 'cylindrical-roller-bearings' },
+      { name: 'Tapered Roller Bearings', id: 'tapered-roller-bearings' },
+      { name: 'Needle Roller Bearings', id: 'needle-roller-bearings' },
+      { name: 'Thrust Bearings', id: 'thrust-bearings' },
     ],
   },
   {
-    name: 'Baby Products',
+    name: 'Mounted & Linear Units',
     id: 'baby',
     categories: [
-      { name: 'Apparel', id: 'apparel' },
-      { name: 'Accessories', id: 'accessories' },
+      { name: 'Mounted Bearing Units', id: 'mounted-bearing-units' },
+      { name: 'Linear Motion', id: 'linear-motion' },
+      { name: 'Bearing Housings & Seals', id: 'bearing-housings-seals' },
     ],
   },
 ];

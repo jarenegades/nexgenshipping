@@ -9,6 +9,7 @@ import { Currency, convertCurrency, formatCurrency } from '../utils/currencyServ
 import { ReviewsSection } from './ReviewsSection';
 import { reviewsService } from '../utils/reviewsService';
 import { productsService } from '../utils/productsService';
+import { bearingCategoryLabel } from '../utils/bearingCatalog';
 
 interface ProductDetailPageProps {
   product?: Product | null;
@@ -362,11 +363,11 @@ export function ProductDetailPage({
           <div>
             <h3 className="text-[#003366] mb-2">About This Item</h3>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>High-quality {displayProduct.category === 'baby' ? 'baby' : 'pharmaceutical'} product</li>
-              <li>Trusted brand with excellent customer reviews</li>
-              <li>Safe and reliable for everyday use</li>
-              <li>Meets all regulatory standards and quality requirements</li>
-              <li>Fast shipping available to customers worldwide</li>
+              <li>Industrial-grade bearing component selected for dependable equipment performance</li>
+              <li>Designed to support specified radial, axial or combined loads</li>
+              <li>Suitable for maintenance, replacement and OEM applications</li>
+              <li>Confirm dimensions, fitment, speed and load requirements before ordering</li>
+              <li>Technical product support and worldwide shipping are available</li>
             </ul>
           </div>
 
@@ -375,7 +376,7 @@ export function ProductDetailPage({
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-600">Category:</span>
-                <span className="ml-2 capitalize">{displayProduct.category}</span>
+                <span className="ml-2">{bearingCategoryLabel(displayProduct.category)}</span>
               </div>
               <div>
                 <span className="text-gray-600">Product ID:</span>

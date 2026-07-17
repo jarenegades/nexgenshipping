@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { toast } from 'sonner';
 import { authService } from '../utils/authService';
 import { config } from '../utils/config';
-import logoImage from '../assets/nexgen-logo-new.png';
+const logoImage = '/Max%20Bearings%20Logo.png';
 
 export function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -129,7 +129,7 @@ export function ResetPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logoImage} alt="NEX-GEN Shipping Agency" className="h-16 w-auto" />
+            <img src={logoImage} alt="Max Bearings" className="h-20 w-auto" />
           </div>
           <CardTitle className="text-[#003366]">Reset Your Password</CardTitle>
           <CardDescription>

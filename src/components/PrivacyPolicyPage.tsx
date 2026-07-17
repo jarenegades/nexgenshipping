@@ -10,15 +10,15 @@ export function PrivacyPolicyPage() {
         </div>
 
         <p className="text-gray-600 mb-8">
-          <strong>Effective Date:</strong> January 1, 2024<br />
-          <strong>Last Updated:</strong> October 18, 2025
+          <strong>Effective Date:</strong> July 17, 2026<br />
+          <strong>Last Updated:</strong> July 17, 2026
         </p>
 
         <div className="space-y-8">
           <section>
             <h2 className="text-[#003366] mb-4">1. Introduction</h2>
             <p className="text-gray-700 leading-relaxed">
-              Nex-Gen Shipping Agency ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website www.nexgenshipping.com and use our services. Please read this policy carefully to understand our practices regarding your personal data.
+              Max Bearings ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services. Please read it carefully to understand our data practices.
             </p>
           </section>
 
@@ -112,7 +112,7 @@ export function PrivacyPolicyPage() {
               <li><strong>Object:</strong> Object to processing of your personal information</li>
             </ul>
             <p className="text-gray-700 mt-4">
-              To exercise these rights, please contact us at info@nexgenshipping.com
+              To exercise these rights, please contact us at info@maxbearingsja.com
             </p>
           </section>
 
@@ -158,10 +158,10 @@ export function PrivacyPolicyPage() {
                 If you have questions or concerns about this Privacy Policy or our data practices, please contact us:
               </p>
               <div className="text-gray-700 space-y-1">
-                <p><strong>Nex-Gen Shipping Agency</strong></p>
-                <p>Email: info@nexgenshipping.com</p>
+                <p><strong>Max Bearings</strong></p>
+                <p>Email: info@maxbearingsja.com</p>
                 <p>Phone: (689) 680-1264</p>
-                <p>Website: www.nexgenshipping.com</p>
+                <p>Address: Ocho Rios, St. Ann, Jamaica</p>
               </div>
             </div>
           </section>

@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import logoImage from '../assets/nexgen-logo-new.png';
+const logoImage = '/Max%20Bearings%20Logo.png';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -20,7 +20,7 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
   onSearchSubmit: (query: string) => void;
   currentPage: string;
-  onNavigate: (page: 'home' | 'about' | 'contact' | 'cart' | 'privacy' | 'returns' | 'orders' | 'wishlist' | 'account') => void;
+  onNavigate: (page: 'home' | 'about' | 'blog' | 'contact' | 'cart' | 'privacy' | 'returns' | 'orders' | 'wishlist' | 'account') => void;
   onOpenCategoryBrowser: () => void;
   selectedCurrency?: Currency;
   onCurrencyChange?: (currency: Currency) => void;
@@ -74,8 +74,8 @@ export function Header({
             >
               <img 
                 src={logoImage} 
-                alt="NEX-GEN Shipping Agency" 
-                className="h-12 sm:h-14 md:h-16 w-auto"
+                alt="Max Bearings" 
+                className="h-10 sm:h-12 md:h-14 w-auto max-w-[100px] sm:max-w-[120px] md:max-w-[140px] object-contain"
               />
             </div>
 
@@ -91,13 +91,13 @@ export function Header({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => onCategoryChange('all')}>All Categories</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onCategoryChange('baby')}>Baby Products</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onCategoryChange('pharmaceutical')}>Pharmaceuticals</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onCategoryChange('baby')}>Mounted & Linear Units</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onCategoryChange('pharmaceutical')}>Rolling Bearings</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search bearings, units and components..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
@@ -258,7 +258,7 @@ export function Header({
                 selectedCategory === 'baby' && currentPage === '/' ? 'bg-[#004080]' : ''
               }`}
             >
-              Baby Products
+              Mounted & Linear Units
             </button>
             <button
               onClick={() => onCategoryChange('pharmaceutical')}
@@ -266,7 +266,7 @@ export function Header({
                 selectedCategory === 'pharmaceutical' && currentPage === '/' ? 'bg-[#004080]' : ''
               }`}
             >
-              Pharmaceuticals
+              Rolling Bearings
             </button>
             <button 
               onClick={() => onNavigate('about')}
@@ -275,6 +275,12 @@ export function Header({
               }`}
             >
               About Us
+            </button>
+            <button
+              onClick={() => onNavigate('blog')}
+              className={`px-3 py-3 text-sm hover:bg-[#004080] transition-colors ${currentPage === '/blog' ? 'bg-[#004080]' : ''}`}
+            >
+              Bearing Guides
             </button>
             <button 
               onClick={() => onNavigate('contact')}

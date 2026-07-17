@@ -5,6 +5,7 @@ import { Footer } from './components/Footer';
 import { ProductCard, Product } from './components/ProductCard';
 import { LoginDialog } from './components/LoginDialog';
 import { AboutPage } from './components/AboutPage';
+import { BlogPage } from './components/BlogPage';
 import { ContactPage } from './components/ContactPage';
 import { CartPage } from './components/CartPage';
 import { CheckoutPage } from './components/CheckoutPage';
@@ -12,6 +13,7 @@ import { FeaturedSection } from './components/FeaturedSection';
 import { CategoryBrowser, PRODUCT_CATEGORIES } from './components/CategoryBrowser';
 import { CategoryBreadcrumb } from './components/CategoryBreadcrumb';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
+import { TermsConditionsPage } from './components/TermsConditionsPage';
 import { ReturnPolicyPage } from './components/ReturnPolicyPage';
 import { ProductDetailPage } from './components/ProductDetailPage';
 import { OrdersPage } from './components/OrdersPage';
@@ -28,7 +30,6 @@ import { wishlistService, WishlistItem } from './utils/wishlistService';
 import { config } from './utils/config';
 import { Currency, getUserCurrency, setUserCurrency, convertCurrency, formatCurrency, updateExchangeRates } from './utils/currencyService';
 import { authService } from './utils/authService';
-import logoImage from './assets/nexgen-logo-new.png';
 
 // Unused image imports - kept for reference only
 /* 
@@ -400,7 +401,7 @@ function AppContent() {
         onSearchChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         currentPage={location.pathname}
-        onNavigate={handleNavigate}
+        onNavigate={handleNavigate as any}
         onOpenCategoryBrowser={() => setShowCategoryBrowser(true)}
         selectedCurrency={selectedCurrency}
         onCurrencyChange={handleCurrencyChange}
@@ -454,8 +455,8 @@ function AppContent() {
                     {searchQuery ? `Search Results for "${searchQuery}"` :
                       selectedCategoryId || selectedSubcategoryId ? 'Filtered Products' :
                         selectedCategory === 'all' ? 'All Products' :
-                          selectedCategory === 'baby' ? 'Baby Products' :
-                            'Pharmaceutical Products'}
+                          selectedCategory === 'baby' ? 'Mounted & Linear Units' :
+                            'Rolling Bearings'}
                   </h2>
                   <p className="text-sm text-gray-600 mt-1">
                     {totalProducts} {totalProducts === 1 ? 'product' : 'products'} found
@@ -546,8 +547,10 @@ function AppContent() {
         } />
 
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/blog" element={<BlogPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsConditionsPage />} />
         <Route path="/returns" element={<ReturnPolicyPage />} />
 
         <Route path="/cart" element={
