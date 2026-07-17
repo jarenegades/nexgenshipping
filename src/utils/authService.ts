@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient';
 import { config } from './config';
-import { publicAnonKey } from './supabase/info';
+import { publicAnonKey, supabaseUrl } from './supabase/info';
 
 /**
  * Authentication Service - Handles user authentication with Supabase
@@ -38,7 +38,6 @@ export const authService = {
       console.log('🔵 Attempting Supabase sign up for:', email);
       
       // Try using Edge Function first (bypasses CORS)
-      const supabaseUrl = `https://erxkwytqautexizleeov.supabase.co`;
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/auth-signup`;
       
       try {
@@ -148,7 +147,6 @@ export const authService = {
 
     try {
       // Try using Edge Function first (bypasses CORS)
-      const supabaseUrl = `https://erxkwytqautexizleeov.supabase.co`;
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/auth-signin`;
       
       try {
@@ -458,7 +456,6 @@ export const authService = {
       console.log('🔵 Redirect URL:', redirectUrl);
       
       // Try using Edge Function first (bypasses CORS)
-      const supabaseUrl = `https://erxkwytqautexizleeov.supabase.co`;
       const edgeFunctionUrl = `${supabaseUrl}/functions/v1/auth-reset-password`;
       
       try {

@@ -1,7 +1,7 @@
 -- Admin-managed order completion notification settings
 
 CREATE TABLE IF NOT EXISTS public.order_notification_settings (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     notifications_enabled BOOLEAN DEFAULT false,
     admin_emails TEXT[] NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -14,7 +14,7 @@ VALUES ('00000000-0000-0000-0000-000000000002'::uuid, false, '{}')
 ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS public.supplier_notification_routes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     email VARCHAR(255) NOT NULL,
     category_id VARCHAR(100) NOT NULL,
     subcategory_id VARCHAR(100),

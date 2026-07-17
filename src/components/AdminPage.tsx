@@ -24,7 +24,7 @@ import { productsService } from '../utils/productsService';
 import { paymentGatewayService, PaymentGatewaySettings } from '../utils/paymentGatewayService';
 import { currencyRatesService, CurrencyRate } from '../utils/currencyRatesService';
 import { Switch } from './ui/switch';
-import { publicAnonKey } from '../utils/supabase/info';
+import { publicAnonKey, supabaseUrl } from '../utils/supabase/info';
 import { PRODUCT_CATEGORIES } from './CategoryBrowser';
 import {
   orderNotificationSettingsService,
@@ -345,7 +345,6 @@ export function AdminPage({
 
         try {
           // Try using Edge Function first to bypass CORS
-          const supabaseUrl = `https://erxkwytqautexizleeov.supabase.co`;
           const edgeFunctionUrl = `${supabaseUrl}/functions/v1/download-image`;
 
           try {

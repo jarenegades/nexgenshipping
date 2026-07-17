@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient';
-import { projectId, publicAnonKey } from './supabase/info';
+import { publicAnonKey, supabaseUrl } from './supabase/info';
 
-const SUPABASE_URL = `https://${projectId}.supabase.co`;
+const SUPABASE_URL = supabaseUrl;
 const USER_NOTIFICATION_PREFERENCES_URL = `${SUPABASE_URL}/functions/v1/user-notification-preferences`;
 
 export interface UserNotificationPreferences {

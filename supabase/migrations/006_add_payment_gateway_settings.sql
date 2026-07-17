@@ -4,7 +4,7 @@
 
 -- Payment gateway settings table (single row - admin managed)
 CREATE TABLE IF NOT EXISTS public.payment_gateway_settings (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     
     -- DimePay Configuration
     merchant_id VARCHAR(255),

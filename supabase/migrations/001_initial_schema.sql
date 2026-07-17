@@ -23,7 +23,7 @@ CREATE TABLE public.user_profiles (
 
 -- User addresses
 CREATE TABLE public.user_addresses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     address_type VARCHAR(20) DEFAULT 'shipping' CHECK (address_type IN ('shipping', 'billing')),
     is_default BOOLEAN DEFAULT false,
@@ -38,7 +38,7 @@ CREATE TABLE public.user_addresses (
 
 -- User notification preferences
 CREATE TABLE public.user_notification_preferences (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
     order_updates BOOLEAN DEFAULT true,
     promotions BOOLEAN DEFAULT true,
@@ -68,7 +68,7 @@ CREATE TABLE public.categories (
 
 -- Products
 CREATE TABLE public.products (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     category VARCHAR(50) NOT NULL CHECK (category IN ('baby', 'pharmaceutical')),
@@ -95,7 +95,7 @@ CREATE TABLE public.products (
 
 -- Product reviews
 CREATE TABLE public.product_reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
@@ -116,7 +116,7 @@ CREATE TABLE public.product_reviews (
 
 -- Shopping cart
 CREATE TABLE public.cart_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
@@ -129,7 +129,7 @@ CREATE TABLE public.cart_items (
 
 -- Wishlist
 CREATE TABLE public.wishlist_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -140,7 +140,7 @@ CREATE TABLE public.wishlist_items (
 
 -- Orders
 CREATE TABLE public.orders (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     order_number VARCHAR(50) NOT NULL UNIQUE,
     user_id UUID NOT NULL REFERENCES auth.users(id),
     status VARCHAR(20) DEFAULT 'processing' CHECK (status IN ('processing', 'confirmed', 'in-transit', 'delivered', 'cancelled', 'refunded')),
@@ -179,7 +179,7 @@ CREATE TABLE public.orders (
 
 -- Order items
 CREATE TABLE public.order_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES public.products(id),
     
@@ -200,7 +200,7 @@ CREATE TABLE public.order_items (
 
 -- Inventory transactions log
 CREATE TABLE public.inventory_transactions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
     product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('purchase', 'sale', 'return', 'adjustment', 'restock')),
     quantity_change INTEGER NOT NULL,

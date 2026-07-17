@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient';
-import { projectId, publicAnonKey } from './supabase/info';
+import { publicAnonKey, supabaseUrl } from './supabase/info';
 
-const SUPABASE_URL = `https://${projectId}.supabase.co`;
+const SUPABASE_URL = supabaseUrl;
 const ADMIN_ORDERS_URL = `${SUPABASE_URL}/functions/v1/admin-orders`;
 const PROCESS_REFUND_URL = `${SUPABASE_URL}/functions/v1/process-refund`;
 

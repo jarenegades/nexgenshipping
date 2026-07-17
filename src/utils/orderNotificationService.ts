@@ -1,6 +1,6 @@
-import { publicAnonKey, projectId } from './supabase/info';
+import { publicAnonKey, supabaseUrl } from './supabase/info';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || `https://${projectId}.supabase.co`;
+const SUPABASE_URL = supabaseUrl;
 const ORDER_NOTIFICATION_URL = `${SUPABASE_URL}/functions/v1/send-order-notifications`;
 
 export interface OrderNotificationPayload {

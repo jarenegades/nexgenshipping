@@ -1,65 +1,73 @@
--- Add password_hash column for direct authentication
--- This allows authentication without relying on Supabase Auth (avoids CORS)
+-- Secure profile support for Supabase Auth.
+-- Customer passwords remain exclusively in auth.users and are never stored in
+-- public tables.
 
--- Add email and password_hash columns to user_profiles
-ALTER TABLE user_profiles 
-ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE,
-ADD COLUMN IF NOT EXISTS password_hash TEXT;
+ALTER TABLE public.user_profiles
+ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE;
 
--- Create a function to auto-create auth.users entry
-CREATE OR REPLACE FUNCTION create_auth_user_for_profile()
-RETURNS TRIGGER AS $$
+-- Remove the legacy direct-auth trigger and its public policies.
+DROP TRIGGER IF EXISTS create_auth_user_trigger ON public.user_profiles;
+DROP FUNCTION IF EXISTS public.create_auth_user_for_profile();
+
+DROP POLICY IF EXISTS "Anyone can create profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Public can read for auth" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.user_profiles;
+
+CREATE SCHEMA IF NOT EXISTS private;
+
+CREATE OR REPLACE FUNCTION private.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-    -- Try to insert into auth.users (may fail if not accessible)
-    BEGIN
-        INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
-        VALUES (NEW.id, NEW.email, NEW.password_hash, NOW(), NOW(), NOW())
-        ON CONFLICT (id) DO NOTHING;
-    EXCEPTION WHEN OTHERS THEN
-        -- Ignore errors if we can't access auth.users
-        NULL;
-    END;
-    RETURN NEW;
+  INSERT INTO public.user_profiles (id, email, first_name, last_name, is_admin)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data ->> 'first_name', ''),
+    COALESCE(NEW.raw_user_meta_data ->> 'last_name', ''),
+    false
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET email = EXCLUDED.email;
+
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
--- Create trigger to auto-create auth.users entry
-DROP TRIGGER IF EXISTS create_auth_user_trigger ON user_profiles;
-CREATE TRIGGER create_auth_user_trigger
-    BEFORE INSERT ON user_profiles
-    FOR EACH ROW
-    EXECUTE FUNCTION create_auth_user_for_profile();
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION private.handle_new_user();
 
--- Add email column to user_profiles (since we're bypassing auth.users)
-ALTER TABLE user_profiles 
-ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE,
-ADD COLUMN IF NOT EXISTS password_hash TEXT;
+CREATE OR REPLACE FUNCTION private.prevent_customer_admin_changes()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF auth.uid() IS NOT NULL AND NEW.is_admin IS DISTINCT FROM OLD.is_admin THEN
+    RAISE EXCEPTION 'Only server-side administration can change admin access';
+  END IF;
 
--- Add index for faster lookups during login
-CREATE INDEX IF NOT EXISTS idx_user_profiles_email 
-ON user_profiles(email);
+  RETURN NEW;
+END;
+$$;
 
-CREATE INDEX IF NOT EXISTS idx_user_profiles_email_password 
-ON user_profiles(email, password_hash);
+DROP TRIGGER IF EXISTS prevent_customer_admin_changes ON public.user_profiles;
+CREATE TRIGGER prevent_customer_admin_changes
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW EXECUTE FUNCTION private.prevent_customer_admin_changes();
 
--- Update RLS policies to allow inserts during signup
--- Drop all existing policies first
-DROP POLICY IF EXISTS "Users can insert own profile" ON user_profiles;
-DROP POLICY IF EXISTS "Anyone can create profile" ON user_profiles;
-DROP POLICY IF EXISTS "Users can view own profile" ON user_profiles;
-DROP POLICY IF EXISTS "Public can read for auth" ON user_profiles;
-DROP POLICY IF EXISTS "Users can update own profile" ON user_profiles;
+CREATE POLICY "Users can view their own profile"
+ON public.user_profiles FOR SELECT
+USING (auth.uid() = id);
 
--- Create new policies
-CREATE POLICY "Anyone can create profile"
-ON user_profiles FOR INSERT
-WITH CHECK (true);
-
-CREATE POLICY "Public can read for auth"
-ON user_profiles FOR SELECT
-USING (true);
-
-CREATE POLICY "Users can update own profile"
-ON user_profiles FOR UPDATE
-USING (true)
-WITH CHECK (true);
+CREATE POLICY "Users can update their own profile"
+ON public.user_profiles FOR UPDATE
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
