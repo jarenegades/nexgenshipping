@@ -79,7 +79,7 @@ export function ContactPage() {
             Follow Max Bearings on Instagram
           </p>
           <a 
-            href="https://instagram.com/maxbearingsja" 
+            href="https://www.instagram.com/jarenegades/"
             target="_blank" 
             rel="noopener noreferrer"
             className="text-[#003366] hover:underline font-semibold"

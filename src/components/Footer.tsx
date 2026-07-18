@@ -44,7 +44,7 @@ export function Footer({ onNavigate }: FooterProps) {
               </br>Rolling bearings, mounted units and motion components delivered with dependable service.
             </p>
             <div className="flex gap-4 pt-2">
-              <a href="https://www.instagram.com/maxbearingsja" className="hover:text-white transition-colors"><Instagram className="h-5 w-5" /></a>
+              <a href="https://www.instagram.com/jarenegades/" className="hover:text-white transition-colors"><Instagram className="h-5 w-5" /></a>
             </div>
           </div>
 
