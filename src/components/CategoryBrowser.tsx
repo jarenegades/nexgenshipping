@@ -1,5 +1,6 @@
 import { ChevronRight, Package } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { categoriesService } from '../utils/categoriesService';
 
 export interface SubCategory {
   name: string;
@@ -52,6 +53,31 @@ interface CategoryBrowserProps {
 export function CategoryBrowser({ onCategorySelect, onClose }: CategoryBrowserProps) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [expandedSubcategory, setExpandedSubcategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<ProductCategory[]>(PRODUCT_CATEGORIES);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const records = await categoriesService.getAll();
+        const groups = records
+          .filter((record) => !record.parent_id)
+          .map((record) => ({
+            id: record.id,
+            name: record.name,
+            categories: records
+              .filter((child) => child.parent_id === record.id)
+              .map((child) => ({ id: child.id, name: child.name })),
+          }))
+          .filter((group) => group.categories.length > 0);
+
+        if (groups.length > 0) setCategories(groups);
+      } catch (error) {
+        console.error('Could not load storefront categories:', error);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   return (
     <div className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
@@ -63,7 +89,7 @@ export function CategoryBrowser({ onCategorySelect, onClose }: CategoryBrowserPr
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 p-6">
-        {PRODUCT_CATEGORIES.map((productCategory) => (
+        {categories.map((productCategory) => (
           <div key={productCategory.id} className="space-y-3">
             <h3 className="text-[#003366] pb-2 border-b border-gray-200">
               {productCategory.name}

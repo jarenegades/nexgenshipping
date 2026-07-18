@@ -11,7 +11,7 @@ import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
-import { Plus, Edit, Trash2, Package, Tag, TrendingUp, Percent, Search, Filter, Upload, Download, FileUp, CheckCircle2, AlertCircle, XCircle, Link2, Image, Users, CreditCard, Settings, RefreshCw, ChevronLeft, ChevronRight, DollarSign, Bell } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Tag, TrendingUp, Percent, Search, Filter, Upload, Download, FileUp, CheckCircle2, AlertCircle, XCircle, Link2, Image, Users, CreditCard, Settings, RefreshCw, ChevronLeft, ChevronRight, DollarSign, Bell, Layers3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { SupabaseStatus } from './SupabaseStatus';
@@ -26,6 +26,7 @@ import { currencyRatesService, CurrencyRate } from '../utils/currencyRatesServic
 import { Switch } from './ui/switch';
 import { publicAnonKey, supabaseUrl } from '../utils/supabase/info';
 import { PRODUCT_CATEGORIES } from './CategoryBrowser';
+import { CategoryManagementPanel } from './CategoryManagementPanel';
 import {
   orderNotificationSettingsService,
   OrderNotificationSettings,
@@ -1360,6 +1361,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
               <Package className="h-4 w-4 mr-2" />
               Products
             </TabsTrigger>
+            <TabsTrigger value="categories" className="flex-shrink-0">
+              <Layers3 className="h-4 w-4 mr-2" />
+              Categories
+            </TabsTrigger>
             <TabsTrigger value="badges" className="flex-shrink-0">
               <Tag className="h-4 w-4 mr-2" />
               Badges
@@ -2070,6 +2075,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="categories">
+            <CategoryManagementPanel />
           </TabsContent>
 
           {/* Badges Tab */}
