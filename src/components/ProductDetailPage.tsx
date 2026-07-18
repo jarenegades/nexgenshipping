@@ -236,7 +236,9 @@ export function ProductDetailPage({
 
             {/* Price */}
             <div className="mb-6">
-              {isLoggedIn ? (
+              {displayProduct.purchaseMode === 'quote' ? (
+                <div className="rounded border border-blue-200 bg-blue-50 p-4 text-[#003366]">Request a quote for current availability, pricing and delivery options.</div>
+              ) : isLoggedIn ? (
                 <div className="space-y-2">
                   <div className="flex items-baseline gap-3">
                     {displayOriginalPrice && (
@@ -284,7 +286,7 @@ export function ProductDetailPage({
             </div>
 
             {/* Quantity Selector */}
-            {isLoggedIn && displayProduct.inStock && (
+            {isLoggedIn && displayProduct.inStock && displayProduct.purchaseMode !== 'quote' && (
               <div className="mb-6">
                 <label className="block text-sm text-gray-700 mb-2">Quantity:</label>
                 <div className="flex items-center gap-3">
@@ -307,7 +309,9 @@ export function ProductDetailPage({
 
             {/* Action Buttons */}
             <div className="space-y-3 mb-6">
-              {isLoggedIn ? (
+              {displayProduct.purchaseMode === 'quote' ? (
+                <Button onClick={() => window.location.assign(`/contact?quote=${encodeURIComponent(displayProduct.name)}`)} className="w-full bg-[#003366] hover:bg-[#0055AA] text-white h-12">Request a Quote</Button>
+              ) : isLoggedIn ? (
                 <>
                   <Button
                     onClick={handleAddToCart}

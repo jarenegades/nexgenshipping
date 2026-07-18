@@ -20,6 +20,7 @@ import { cartService } from '../utils/cartService';
 import { ordersService } from '../utils/ordersService';
 import { orderNotificationService } from '../utils/orderNotificationService';
 import { ShippingMethod, shippingMethodsService } from '../utils/shippingMethodsService';
+import { PaymentMethodCode, PaymentMethodSetting, commerceSettingsService } from '../utils/commerceSettingsService';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
@@ -34,6 +35,8 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
   const [currentStep, setCurrentStep] = useState(1);
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodCode>('card');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodSetting[]>([]);
   const [clientSecret, setClientSecret] = useState('');
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [isPreparingPayment, setIsPreparingPayment] = useState(false);
@@ -79,10 +82,25 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
       .catch((error) => console.error('Could not load shipping methods:', error));
   }, []);
 
+  useEffect(() => {
+    commerceSettingsService.getActivePaymentMethods()
+      .then((methods) => {
+        setPaymentMethods(methods);
+        if (methods.length > 0 && !methods.some((method) => method.code === paymentMethod)) setPaymentMethod(methods[0].code);
+      })
+      .catch((error) => console.error('Could not load payment methods:', error));
+  }, []);
+
   const handleShippingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!Object.values(shippingInfo).every(val => val.trim())) {
       toast.error('Please fill in all shipping fields');
+      return;
+    }
+
+    if (paymentMethod !== 'card') {
+      setCurrentStep(3);
+      toast.success('Payment method saved');
       return;
     }
 
@@ -144,7 +162,7 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
       const order = await ordersService.create(
         {
           user_id: user.id,
-          status: 'confirmed',
+          status: paymentMethod === 'card' ? 'confirmed' : 'processing',
           subtotal,
           tax,
           shipping_cost: shippingCost,
@@ -158,8 +176,8 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
           shipping_state: shippingInfo.state,
           shipping_zip_code: shippingInfo.zipCode,
           shipping_country: 'United States',
-          payment_method: 'credit-card',
-          payment_status: 'completed',
+          payment_method: paymentMethod === 'cash-on-delivery' ? 'cash-on-delivery' : paymentMethod === 'bank-transfer' ? 'bank-transfer' : 'credit-card',
+          payment_status: paymentMethod === 'card' ? 'completed' : 'pending',
           payment_transaction_id: paymentIntentId || null,
         },
         cartItems.map((item) => ({
@@ -378,6 +396,14 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
                   </RadioGroup>
                 </div>
 
+                <Separator className="my-6" />
+                <div>
+                  <h3 className="text-[#003366] mb-4">Payment Method</h3>
+                  <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethodCode)}>
+                    {paymentMethods.map((method) => <div key={method.code} className="flex items-center justify-between p-4 border rounded-lg mb-2"><div className="flex items-center space-x-2"><RadioGroupItem value={method.code} id={`payment-${method.code}`} /><Label htmlFor={`payment-${method.code}`} className="cursor-pointer"><div><p className="font-semibold">{method.name}</p><p className="text-sm text-gray-500">{method.description}</p></div></Label></div></div>)}
+                  </RadioGroup>
+                </div>
+
                 <Button type="submit" className="w-full bg-[#003366] hover:bg-[#0055AA] text-white">
                   Continue to Payment
                 </Button>
@@ -471,7 +497,7 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-[#003366]">Payment Method</h2>
                   <button
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => setCurrentStep(paymentMethod === 'card' ? 2 : 1)}
                     className="text-sm text-[#0055AA] hover:underline"
                   >
                     Edit
@@ -480,8 +506,8 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
                 <div className="flex items-center gap-3">
                   <Lock className="h-8 w-8 text-green-600" />
                   <div className="text-sm">
-                    <p className="font-semibold">Stripe Payment</p>
-                    <p className="text-gray-600">Payment confirmed and secured by Stripe</p>
+                    <p className="font-semibold">{paymentMethods.find((method) => method.code === paymentMethod)?.name || 'Payment'}</p>
+                    <p className="text-gray-600">{paymentMethod === 'card' ? 'Payment confirmed and secured by Stripe' : paymentMethod === 'cash-on-delivery' ? 'Payment will be collected at delivery.' : 'Bank transfer instructions will be provided after the order is placed.'}</p>
                   </div>
                 </div>
               </div>
@@ -517,7 +543,7 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
               <div className="flex gap-4">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => setCurrentStep(paymentMethod === 'card' ? 2 : 1)}
                   className="flex-1"
                   disabled={isPlacingOrder}
                 >

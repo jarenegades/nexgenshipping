@@ -28,6 +28,7 @@ import { publicAnonKey, supabaseUrl } from '../utils/supabase/info';
 import { PRODUCT_CATEGORIES } from './CategoryBrowser';
 import { CategoryManagementPanel } from './CategoryManagementPanel';
 import { ShippingSettingsPanel } from './ShippingSettingsPanel';
+import { CommerceSettingsPanel } from './CommerceSettingsPanel';
 import {
   orderNotificationSettingsService,
   OrderNotificationSettings,
@@ -1382,6 +1383,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
               <Truck className="h-4 w-4 mr-2" />
               Shipping
             </TabsTrigger>
+            <TabsTrigger value="commerce-settings" className="flex-shrink-0">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payments & Quotes
+            </TabsTrigger>
             <TabsTrigger value="bulk-upload" className="flex-shrink-0">
               <Upload className="h-4 w-4 mr-2" />
               Bulk Upload
@@ -2088,6 +2093,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
 
           <TabsContent value="shipping-settings">
             <ShippingSettingsPanel />
+          </TabsContent>
+
+          <TabsContent value="commerce-settings">
+            <CommerceSettingsPanel products={adminAllProducts} />
           </TabsContent>
 
           {/* Badges Tab */}

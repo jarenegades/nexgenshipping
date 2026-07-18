@@ -24,6 +24,7 @@ export interface Product {
   stockCount?: number;      // Number of units in stock
   soldCount?: number;        // Total number of units sold (for analytics)
   costPrice?: number;        // Cost to acquire the product (for profit calculations)
+  purchaseMode?: 'price' | 'quote';
 }
 
 interface ProductCardProps {
@@ -138,7 +139,9 @@ export function ProductCard({
 
         {/* Price section */}
         <div className="mb-3">
-          {isLoggedIn ? (
+          {product.purchaseMode === 'quote' ? (
+            <span className="text-[#003366] font-semibold">Request a Quote</span>
+          ) : isLoggedIn ? (
             <div className="flex items-baseline gap-2">
               <span className="text-[#DC143C] font-bold text-xl">
                 {formatCurrency(displayPrice, selectedCurrency)}
@@ -168,7 +171,9 @@ export function ProductCard({
 
         {/* Add to cart button */}
         <div className="mt-auto">
-          {isLoggedIn ? (
+          {product.purchaseMode === 'quote' ? (
+            <Button onClick={() => onProductClick?.(product.id)} className="w-full bg-[#003366] hover:bg-[#0055AA] text-white">Request a Quote</Button>
+          ) : isLoggedIn ? (
             <Button
               onClick={() => onAddToCart(product.id)}
               disabled={!product.inStock}

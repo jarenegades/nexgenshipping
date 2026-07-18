@@ -25,7 +25,7 @@ export interface Order {
   shipping_state: string;
   shipping_zip_code: string;
   shipping_country: string;
-  payment_method?: 'credit-card' | 'debit-card' | 'paypal' | 'bank-transfer';
+  payment_method?: 'credit-card' | 'debit-card' | 'paypal' | 'bank-transfer' | 'cash-on-delivery';
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   payment_transaction_id?: string;
   created_at: string;

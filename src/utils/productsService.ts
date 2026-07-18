@@ -3,6 +3,18 @@ import { Product } from '../components/ProductCard';
 import { config } from './config';
 import { bearingCategoryIds, bearingCopyFor, bearingImageFor } from './bearingCatalog';
 import { showcaseProducts } from '../data/showcaseProducts';
+import { commerceSettingsService } from './commerceSettingsService';
+
+const applyPricingSettings = async (products: Product[]): Promise<Product[]> => {
+  try {
+    const settings = await commerceSettingsService.getPricingSettings();
+    const purchaseModes = new Map(settings.map((setting) => [setting.product_id, setting.purchase_mode]));
+    return products.map((product) => ({ ...product, purchaseMode: purchaseModes.get(product.id) || 'price' }));
+  } catch (error) {
+    console.error('Could not load product pricing settings:', error);
+    return products;
+  }
+};
 
 /**
  * Products Service - Handles all product operations with Supabase
@@ -51,7 +63,7 @@ export const productsService = {
     if (options.sortBy === 'price-high') products = [...products].sort((a, b) => b.price - a.price);
     if (options.sortBy === 'rating') products = [...products].sort((a, b) => b.rating - a.rating);
 
-    return { products: products.slice((page - 1) * limit, page * limit), count: products.length };
+    return { products: await applyPricingSettings(products.slice((page - 1) * limit, page * limit)), count: products.length };
 
     try {
       const page = options.page || 1;
@@ -164,7 +176,7 @@ export const productsService = {
    * Fetch all active products from Supabase
    */
   async getAll(): Promise<Product[]> {
-    return showcaseProducts;
+    return applyPricingSettings(showcaseProducts);
 
     try {
       const { data, error } = await supabase
@@ -188,7 +200,8 @@ export const productsService = {
    * Get a single product by ID
    */
   async getById(id: string): Promise<Product | null> {
-    return showcaseProducts.find((product) => product.id === id) || null;
+    const product = showcaseProducts.find((item) => item.id === id) || null;
+    return product ? (await applyPricingSettings([product]))[0] : null;
 
     try {
       const { data, error } = await supabase
