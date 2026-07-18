@@ -32,4 +32,11 @@ export const commerceSettingsService = {
     const { error } = await supabase.from('product_pricing_settings').upsert({ product_id: productId, purchase_mode: purchaseMode, updated_at: new Date().toISOString() }, { onConflict: 'product_id' });
     if (error) throw error;
   },
+  async setProductPurchaseModes(productIds: string[], purchaseMode: 'price' | 'quote') {
+    if (productIds.length === 0) return;
+    const { error } = await supabase
+      .from('product_pricing_settings')
+      .upsert(productIds.map((product_id) => ({ product_id, purchase_mode: purchaseMode, updated_at: new Date().toISOString() })), { onConflict: 'product_id' });
+    if (error) throw error;
+  },
 };
