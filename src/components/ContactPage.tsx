@@ -32,10 +32,10 @@ export function ContactPage() {
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-6 md:py-12">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#DC143C] to-[#FF4444] text-white rounded-lg shadow-lg p-6 md:p-12 mb-8">
+      <div className="bg-gradient-to-r from-[#003366] to-[#0055AA] text-white rounded-lg shadow-lg p-6 md:p-12 mb-8">
         <div className="max-w-3xl">
           <h1 className="mb-4">Get In Touch</h1>
-          <p className="text-lg md:text-xl text-red-100 leading-relaxed">
+          <p className="text-lg md:text-xl text-blue-100 leading-relaxed">
             Need help identifying a bearing or component? The Max Bearings support team can assist with orders, product 
             information and general sourcing questions.
           </p>
@@ -44,15 +44,15 @@ export function ContactPage() {
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         {/* Quick Contact Cards */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-[#DC143C] hover:shadow-md transition-shadow">
-          <div className="bg-red-50 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-            <Phone className="h-6 w-6 text-[#DC143C]" />
+        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-[#003366] hover:shadow-md transition-shadow">
+          <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <Phone className="h-6 w-6 text-[#003366]" />
           </div>
           <h3 className="text-[#003366] mb-2">Call Us</h3>
           <p className="text-gray-600 text-sm mb-3">
             Speak with Max Bearings support
           </p>
-          <a href="tel:+16896801264" className="text-[#DC143C] hover:underline font-semibold">
+          <a href="tel:+16896801264" className="text-[#003366] hover:underline font-semibold">
             (689) 680-1264
           </a>
         </div>
@@ -93,7 +93,7 @@ export function ContactPage() {
         {/* Contact Form */}
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="bg-[#DC143C] w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="bg-[#003366] w-10 h-10 rounded-full flex items-center justify-center">
               <HeadphonesIcon className="h-5 w-5 text-white" />
             </div>
             <h2 className="text-[#003366]">Send Us a Message</h2>
@@ -189,7 +189,7 @@ export function ContactPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#DC143C] hover:bg-[#B01030] text-white"
+              className="w-full bg-[#003366] hover:bg-[#0055AA] text-white"
             >
               Send Message
             </Button>
@@ -199,12 +199,12 @@ export function ContactPage() {
         {/* Info & Map */}
         <div className="space-y-6">
           {/* Office Info */}
-          <div className="bg-gradient-to-br from-blue-50 to-red-50 rounded-lg p-6 md:p-8">
+          <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-lg p-6 md:p-8">
             <h3 className="text-[#003366] mb-6">Max Bearings Information</h3>
             
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-[#DC143C] mt-1 shrink-0" />
+                <MapPin className="h-5 w-5 text-[#003366] mt-1 shrink-0" />
                 <div>
                   <p className="font-semibold text-[#003366] mb-1">Max Bearings Distribution</p>
                   <p className="text-gray-700 text-sm">
@@ -232,12 +232,12 @@ export function ContactPage() {
 
 
           {/* About Our Service */}
-          <div className="bg-[#DC143C] text-white rounded-lg p-6">
+          <div className="bg-[#003366] text-white rounded-lg p-6">
             <h3 className="mb-2">About Max Bearings</h3>
-            <p className="text-sm text-red-100 mb-3">
+            <p className="text-sm text-blue-100 mb-3">
               An industrial component supplier backed by practical distribution experience and responsive service.
             </p>
-            <p className="text-sm text-red-100">
+            <p className="text-sm text-blue-100">
               Max Bearings specializes in rolling bearings, mounted units, linear motion components and worldwide delivery.
             </p>
           </div>
