@@ -23,7 +23,7 @@ export function CategoryManagementPanel() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      setCategories(await categoriesService.getAll(true));
+      setCategories(await categoriesService.getAll());
     } catch (error) {
       console.error('Failed to load categories:', error);
       toast.error('Could not load categories');

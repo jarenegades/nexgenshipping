@@ -25,7 +25,7 @@ import { paymentGatewayService, PaymentGatewaySettings } from '../utils/paymentG
 import { currencyRatesService, CurrencyRate } from '../utils/currencyRatesService';
 import { Switch } from './ui/switch';
 import { publicAnonKey, supabaseUrl } from '../utils/supabase/info';
-import { PRODUCT_CATEGORIES } from './CategoryBrowser';
+import { categoriesService, StoreCategory } from '../utils/categoriesService';
 import { CategoryManagementPanel } from './CategoryManagementPanel';
 import { ShippingSettingsPanel } from './ShippingSettingsPanel';
 import { CommerceSettingsPanel } from './CommerceSettingsPanel';
@@ -74,6 +74,7 @@ export function AdminPage({
   const [adminIsLoadingProducts, setAdminIsLoadingProducts] = useState(false);
   const [adminCurrentPage, setAdminCurrentPage] = useState(1);
   const ADMIN_ITEMS_PER_PAGE = 20;
+  const [catalogCategories, setCatalogCategories] = useState<StoreCategory[]>([]);
 
   // CSV Upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -139,8 +140,8 @@ export function AdminPage({
   const [newProduct, setNewProduct] = useState<any>({
     name: '',
     description: '',
-    category: 'baby',
-    categoryId: 'apparel',
+    category: 'pharmaceutical',
+    categoryId: 'deep-groove-ball-bearings',
     price: '',
     currency: 'USD',
     costPrice: '',
@@ -180,6 +181,12 @@ export function AdminPage({
     };
 
     loadAdminProducts();
+  }, []);
+
+  useEffect(() => {
+    categoriesService.getAll()
+      .then(setCatalogCategories)
+      .catch((error) => console.error('Failed to load storefront categories:', error));
   }, []);
 
   // Reset to first page when filters change
@@ -281,12 +288,14 @@ export function AdminPage({
     loadNotificationSettings();
   }, []);
 
-  const categoryOptions = PRODUCT_CATEGORIES.flatMap((productCategory) =>
-    productCategory.categories.map((category) => ({
+  const parentCategories = catalogCategories.filter((category) => !category.parent_id);
+  const getChildrenForParent = (parentId: string) => catalogCategories.filter((category) => category.parent_id === parentId);
+  const categoryOptions = catalogCategories
+    .filter((category) => category.parent_id)
+    .map((category) => ({
       id: category.id,
-      label: `${productCategory.name} / ${category.name}`,
-    }))
-  );
+      label: `${catalogCategories.find((parent) => parent.id === category.parent_id)?.name || 'Category'} / ${category.name}`,
+    }));
 
   const subcategoryOptionsByCategory = products.reduce<Record<string, string[]>>((acc, product) => {
     if (!product.categoryId || !product.subcategoryId) {
@@ -567,8 +576,8 @@ export function AdminPage({
       const productToAdd: Omit<Product, 'id'> = {
         name: newProduct.name,
         description: newProduct.description || '',
-        category: newProduct.category || 'baby',
-        categoryId: newProduct.categoryId || 'apparel',
+        category: newProduct.category || 'pharmaceutical',
+        categoryId: newProduct.categoryId || 'deep-groove-ball-bearings',
         price: parseFloat(newProduct.price) || 9.99,
         currency: newProduct.currency || 'USD',
         rating: parseFloat(newProduct.rating) || 4.5,
@@ -587,8 +596,8 @@ export function AdminPage({
       setNewProduct({
         name: '',
         description: '',
-        category: 'baby',
-        categoryId: 'apparel',
+        category: 'pharmaceutical',
+        categoryId: 'deep-groove-ball-bearings',
         price: '',
         currency: 'USD',
         costPrice: '',
@@ -611,29 +620,7 @@ export function AdminPage({
     }
   };
 
-  const getCategoryName = (categoryId: string) => {
-    const categories: Record<string, string> = {
-      // Baby categories
-      'apparel': 'Apparel',
-      'accessories': 'Accessories',
-      'baby-feeding': 'Baby Feeding',
-      'baby-toys-entertainment': 'Baby Toys & Entertainment',
-      // Pharmaceutical categories
-      'cold-cough-allergy-sinus': 'Cold, Cough, Allergy & Sinus',
-      'rubs-ointments': 'Rubs & Ointments',
-      'eye-care': 'Eye Care',
-      'first-aid': 'First Aid',
-      'condom-accessories': 'Condom & Accessories',
-      'energy-tabs-vitamins': 'Energy Tabs & Vitamins',
-      'dental-care': 'Dental Care',
-      'feminine-care': 'Feminine Care',
-      'pest-control-repellant': 'Pest Control & Repellant',
-      'stomach-meds': 'Stomach Meds',
-      'otc-medicines': 'OTC Medicines',
-      'lip-care': 'Lip Care',
-    };
-    return categories[categoryId] || categoryId;
-  };
+  const getCategoryName = (categoryId: string) => catalogCategories.find((category) => category.id === categoryId)?.name || categoryId;
 
   // Convert Dropbox URLs to direct download format
   const convertDropboxUrl = (url: string): string => {
@@ -793,34 +780,24 @@ export function AdminPage({
           }
         }
 
-        // Smart category detection with defaults
-        const validCategoryIds = [
-          // Baby categories
-          'apparel', 'accessories',
-          // Pharmaceutical categories
-          'cold-cough-allergy-sinus', 'rubs-ointments', 'eye-care', 'first-aid',
-          'condom-accessories', 'energy-tabs-vitamins', 'dental-care', 'feminine-care',
-          'pest-control-repellant', 'stomach-meds', 'otc-medicines', 'lip-care'
-        ];
+        // Use the same live category catalogue as the storefront navigation.
+        const childCategories = catalogCategories.filter((category) => category.parent_id);
+        const validCategoryIds = childCategories.map((category) => category.id);
+        const defaultCategory = parentCategories.find((category) => category.id === 'pharmaceutical') || parentCategories[0];
+        const defaultCategoryId = getChildrenForParent(defaultCategory?.id || '')[0]?.id || '';
 
-        let category = 'baby'; // Default category
-        let categoryId = 'apparel'; // Default subcategory
+        let category = defaultCategory?.id || 'pharmaceutical';
+        let categoryId = defaultCategoryId;
 
         // Try to use provided categoryId first
         if (row.categoryid && validCategoryIds.includes(row.categoryid.toLowerCase())) {
           categoryId = row.categoryid.toLowerCase();
-          // Infer category from categoryId
-          if (categoryId === 'apparel' || categoryId === 'accessories' || categoryId.startsWith('baby')) {
-            category = 'baby';
-          } else {
-            category = 'pharmaceutical';
-          }
+          category = childCategories.find((item) => item.id === categoryId)?.parent_id || category;
         }
         // Otherwise try to use provided category
-        else if (row.category && ['baby', 'pharmaceutical'].includes(row.category.toLowerCase())) {
+        else if (row.category && parentCategories.some((item) => item.id === row.category.toLowerCase())) {
           category = row.category.toLowerCase();
-          // Set default categoryId based on category
-          categoryId = category === 'baby' ? 'apparel' : 'cold-cough-allergy-sinus';
+          categoryId = getChildrenForParent(category)[0]?.id || '';
           if (row.categoryid) {
             warnings.push(`Row ${rowNum}: Invalid categoryId '${row.categoryid}', using default '${categoryId}' for ${category} category`);
           }
@@ -828,7 +805,7 @@ export function AdminPage({
         // Use defaults and warn
         else {
           if (row.category || row.categoryid) {
-            warnings.push(`Row ${rowNum}: Invalid category/categoryId values, using defaults (baby / baby-clothing-accessories)`);
+            warnings.push(`Row ${rowNum}: Invalid category/categoryId values, using the default bearing category`);
           }
         }
 
@@ -1214,11 +1191,11 @@ export function AdminPage({
 
   const downloadTemplate = () => {
     const template = `name,description,category,categoryId,price,currency,costPrice,stockCount,soldCount,rating,reviewCount,image,inStock,badge
-Baby Onesie,Soft cotton onesie for newborns,baby,apparel,12.99,USD,6.50,150,87,4.5,150,https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400,true,Best Seller
-Infant Formula,Nutritious formula for babies 0-12 months,baby,baby-feeding,24.99,USD,15.00,200,123,4.8,200,https://images.unsplash.com/photo-1587049352846-4a222e784acc?w=400,true,Standard
-Cold Medicine,Fast relief for cold and flu symptoms,pharmaceutical,cold-cough-allergy-sinus,8.99,USD,4.25,300,456,4.6,180,https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400,true,
-Baby Toy Set,Colorful educational toys,baby,baby-toys-entertainment,19.99,USD,10.00,100,45,4.7,89,https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400,true,New
-Dental Floss,Mint flavored dental floss,pharmaceutical,dental-care,3.99,USD,1.50,500,234,4.8,156,https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400,true,
+6205 Deep Groove Ball Bearing,Single-row bearing for motors and general machinery,pharmaceutical,deep-groove-ball-bearings,12.99,USD,6.50,150,87,4.5,150,,true,Best Seller
+UC205 Mounted Bearing Unit,Preassembled insert bearing unit for conveyors,baby,mounted-bearing-units,24.99,USD,15.00,200,123,4.8,200,,true,Standard
+30205 Tapered Roller Bearing,For combined radial and axial loads,pharmaceutical,tapered-roller-bearings,38.99,USD,20.00,100,45,4.7,89,,true,New
+LM12UU Linear Bearing,Ball bushing for linear motion applications,baby,linear-motion,19.99,USD,10.00,100,45,4.7,89,,true,New
+22210 Spherical Roller Bearing,Self-aligning bearing for heavy-duty equipment,pharmaceutical,spherical-roller-bearings,49.99,USD,28.00,80,22,4.8,42,,true,
 Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
 
     const blob = new Blob([template], { type: 'text/csv' });
@@ -1465,10 +1442,11 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                               <Select
                                 value={newProduct.category}
                                 onValueChange={(value: 'baby' | 'pharmaceutical') => {
+                                  const firstChild = getChildrenForParent(value)[0];
                                   setNewProduct({
                                     ...newProduct,
                                     category: value,
-                                    categoryId: value === 'baby' ? 'baby-clothing-accessories' : 'cold-cough-allergy',
+                                    categoryId: firstChild?.id || '',
                                   });
                                 }}
                               >
@@ -1476,8 +1454,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="baby">Baby Products</SelectItem>
-                                  <SelectItem value="pharmaceutical">Pharmaceutical</SelectItem>
+                                  {parentCategories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -1492,29 +1469,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {newProduct.category === 'baby' ? (
-                                    <>
-                                      <SelectItem value="apparel">Apparel</SelectItem>
-                                      <SelectItem value="accessories">Accessories</SelectItem>
-                                      <SelectItem value="baby-feeding">Feeding</SelectItem>
-                                      <SelectItem value="baby-toys-entertainment">Toys & Entertainment</SelectItem>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <SelectItem value="cold-cough-allergy-sinus">Cold, Cough, Allergy & Sinus</SelectItem>
-                                      <SelectItem value="rubs-ointments">Rubs & Ointments</SelectItem>
-                                      <SelectItem value="eye-care">Eye Care</SelectItem>
-                                      <SelectItem value="first-aid">First Aid</SelectItem>
-                                      <SelectItem value="condom-accessories">Condom & Accessories</SelectItem>
-                                      <SelectItem value="energy-tabs-vitamins">Energy Tabs & Vitamins</SelectItem>
-                                      <SelectItem value="dental-care">Dental Care</SelectItem>
-                                      <SelectItem value="feminine-care">Feminine Care</SelectItem>
-                                      <SelectItem value="pest-control-repellant">Pest Control & Repellant</SelectItem>
-                                      <SelectItem value="stomach-meds">Stomach Meds</SelectItem>
-                                      <SelectItem value="otc-medicines">OTC Medicines</SelectItem>
-                                      <SelectItem value="lip-care">Lip Care</SelectItem>
-                                    </>
-                                  )}
+                                  {getChildrenForParent(newProduct.category).map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -1725,10 +1680,11 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                 <Select
                                   value={editingProduct.category}
                                   onValueChange={(value: 'baby' | 'pharmaceutical') => {
+                                    const firstChild = getChildrenForParent(value)[0];
                                     setEditingProduct({
                                       ...editingProduct,
                                       category: value,
-                                      categoryId: value === 'baby' ? 'baby-clothing-accessories' : 'cold-cough-allergy',
+                                      categoryId: firstChild?.id || '',
                                     });
                                   }}
                                 >
@@ -1736,8 +1692,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="baby">Baby Products</SelectItem>
-                                    <SelectItem value="pharmaceutical">Pharmaceutical</SelectItem>
+                                    {parentCategories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -1752,29 +1707,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {editingProduct.category === 'baby' ? (
-                                      <>
-                                        <SelectItem value="apparel">Apparel</SelectItem>
-                                        <SelectItem value="accessories">Accessories</SelectItem>
-                                        <SelectItem value="baby-feeding">Feeding</SelectItem>
-                                        <SelectItem value="baby-toys-entertainment">Toys & Entertainment</SelectItem>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <SelectItem value="cold-cough-allergy-sinus">Cold, Cough, Allergy & Sinus</SelectItem>
-                                        <SelectItem value="rubs-ointments">Rubs & Ointments</SelectItem>
-                                        <SelectItem value="eye-care">Eye Care</SelectItem>
-                                        <SelectItem value="first-aid">First Aid</SelectItem>
-                                        <SelectItem value="condom-accessories">Condom & Accessories</SelectItem>
-                                        <SelectItem value="energy-tabs-vitamins">Energy Tabs & Vitamins</SelectItem>
-                                        <SelectItem value="dental-care">Dental Care</SelectItem>
-                                        <SelectItem value="feminine-care">Feminine Care</SelectItem>
-                                        <SelectItem value="pest-control-repellant">Pest Control & Repellant</SelectItem>
-                                        <SelectItem value="stomach-meds">Stomach Meds</SelectItem>
-                                        <SelectItem value="otc-medicines">OTC Medicines</SelectItem>
-                                        <SelectItem value="lip-care">Lip Care</SelectItem>
-                                      </>
-                                    )}
+                                    {getChildrenForParent(editingProduct.category).map((category) => <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>)}
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -1945,8 +1878,8 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="baby">Baby Products</SelectItem>
-                          <SelectItem value="pharmaceutical">Pharmaceuticals</SelectItem>
+                          <SelectItem value="baby">Mounted &amp; Linear Units</SelectItem>
+                          <SelectItem value="pharmaceutical">Rolling Bearings</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1956,7 +1889,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                   <div className="text-sm text-gray-600">
                     Showing {paginatedAdminProducts.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filteredAdminProducts.length)} of {filteredAdminProducts.length} products (Total in system: {adminAllProducts.length})
                     {searchQuery && ` matching "${searchQuery}"`}
-                    {categoryFilter !== 'all' && ` in ${categoryFilter === 'baby' ? 'Baby Products' : 'Pharmaceuticals'}`}
+                    {categoryFilter !== 'all' && ` in ${getCategoryName(categoryFilter)}`}
                   </div>
                 </div>
               </CardHeader>
@@ -2128,8 +2061,8 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="baby">Baby Products</SelectItem>
-                          <SelectItem value="pharmaceutical">Pharmaceuticals</SelectItem>
+                          <SelectItem value="baby">Mounted &amp; Linear Units</SelectItem>
+                          <SelectItem value="pharmaceutical">Rolling Bearings</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -2264,8 +2197,8 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="baby">Baby Products</SelectItem>
-                          <SelectItem value="pharmaceutical">Pharmaceuticals</SelectItem>
+                          <SelectItem value="baby">Mounted &amp; Linear Units</SelectItem>
+                          <SelectItem value="pharmaceutical">Rolling Bearings</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -2496,7 +2429,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                         <ul className="list-disc list-inside ml-4 mt-1 text-green-800">
                           <li><strong>name</strong> - Product name (this is all you need!)</li>
                         </ul>
-                        <p className="text-xs text-green-700 mt-2">✨ Everything else is 100% optional! Missing fields automatically get smart defaults (price=$9.99, category=baby, rating=4.5, etc.)</p>
+                        <p className="text-xs text-green-700 mt-2">✨ Everything else is 100% optional! Missing fields automatically get smart defaults (price=$9.99, a bearing category, rating=4.5, etc.)</p>
                       </div>
                       <div>
                         <span className="font-medium">Recommended columns:</span> price, category, categoryId, description
@@ -2523,17 +2456,11 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                         <p className="mt-2 text-blue-700">These fields enable tracking of: goods sold, inventory levels, profit margins, and top-performing products.</p>
                       </div>
                       <div className="mt-3">
-                        <span className="font-medium">Valid categories:</span>
-                        <ul className="list-disc list-inside ml-4 mt-1">
-                          <li>baby</li>
-                          <li>pharmaceutical</li>
-                        </ul>
-                      </div>
-                      <div className="mt-3">
-                        <span className="font-medium">Valid categoryId values:</span>
+                        <span className="font-medium">Available categories:</span>
                         <ul className="list-disc list-inside ml-4 mt-1 text-sm">
-                          <li><strong>Baby:</strong> apparel, accessories</li>
-                          <li><strong>Pharmaceutical:</strong> cold-cough-allergy-sinus, rubs-ointments, eye-care, first-aid, condom-accessories, energy-tabs-vitamins, dental-care, feminine-care, pest-control-repellant, stomach-meds, otc-medicines, lip-care</li>
+                          {parentCategories.map((category) => (
+                            <li key={category.id}><strong>{category.name}:</strong> {getChildrenForParent(category.id).map((child) => child.name).join(', ')}</li>
+                          ))}
                         </ul>
                       </div>
                       <div className="mt-3">
@@ -2812,7 +2739,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm text-gray-600">Baby Products</p>
+                            <p className="text-sm text-gray-600">Mounted &amp; Linear Units</p>
                             <p className="text-2xl font-bold text-[#003366]">
                               {products.filter(p => p.category === 'baby').length}
                             </p>
@@ -2826,7 +2753,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm text-gray-600">Pharmaceuticals</p>
+                            <p className="text-sm text-gray-600">Rolling Bearings</p>
                             <p className="text-2xl font-bold text-[#DC143C]">
                               {products.filter(p => p.category === 'pharmaceutical').length}
                             </p>
@@ -2856,13 +2783,13 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                     <h3 className="font-medium text-lg">Delete Operations</h3>
 
                     <div className="grid gap-4">
-                      {/* Delete Baby Products */}
+                      {/* Delete Mounted & Linear Unit products */}
                       <div className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h4 className="font-medium text-[#003366]">Delete All Baby Products</h4>
+                            <h4 className="font-medium text-[#003366]">Delete All Mounted &amp; Linear Unit Products</h4>
                             <p className="text-sm text-gray-600 mt-1">
-                              Remove all {products.filter(p => p.category === 'baby').length} baby product(s) from the catalog
+                              Remove all {products.filter(p => p.category === 'baby').length} mounted or linear unit product(s) from the catalog
                             </p>
                           </div>
                           <Button
@@ -2872,18 +2799,18 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                             disabled={products.filter(p => p.category === 'baby').length === 0}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Baby
+                            Delete Units
                           </Button>
                         </div>
                       </div>
 
-                      {/* Delete Pharmaceutical Products */}
+                      {/* Delete Rolling Bearing products */}
                       <div className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h4 className="font-medium text-[#DC143C]">Delete All Pharmaceutical Products</h4>
+                            <h4 className="font-medium text-[#DC143C]">Delete All Rolling Bearing Products</h4>
                             <p className="text-sm text-gray-600 mt-1">
-                              Remove all {products.filter(p => p.category === 'pharmaceutical').length} pharmaceutical product(s) from the catalog
+                              Remove all {products.filter(p => p.category === 'pharmaceutical').length} rolling bearing product(s) from the catalog
                             </p>
                           </div>
                           <Button
@@ -2893,7 +2820,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                             disabled={products.filter(p => p.category === 'pharmaceutical').length === 0}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Pharma
+                            Delete Bearings
                           </Button>
                         </div>
                       </div>
@@ -2943,28 +2870,28 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                               This will permanently remove:
                             </p>
                             <ul className="list-disc list-inside text-sm space-y-1 ml-4">
-                              <li>{products.filter(p => p.category === 'baby').length} Baby products</li>
-                              <li>{products.filter(p => p.category === 'pharmaceutical').length} Pharmaceutical products</li>
+                              <li>{products.filter(p => p.category === 'baby').length} Mounted &amp; Linear Unit products</li>
+                              <li>{products.filter(p => p.category === 'pharmaceutical').length} Rolling Bearing products</li>
                             </ul>
                           </div>
                         )}
                         {bulkDeleteAction === 'baby' && (
                             <div className="space-y-2 mt-4">
                               <p className="font-medium">
-                                You are about to delete {products.filter(p => p.category === 'baby').length} baby product(s).
+                                You are about to delete {products.filter(p => p.category === 'baby').length} mounted or linear unit product(s).
                               </p>
                               <p className="text-sm text-gray-600">
-                                This will remove all products in the Baby Products category.
+                                This will remove all products in the Mounted &amp; Linear Units category.
                               </p>
                             </div>
                           )}
                           {bulkDeleteAction === 'pharmaceutical' && (
                             <div className="space-y-2 mt-4">
                               <p className="font-medium">
-                                You are about to delete {products.filter(p => p.category === 'pharmaceutical').length} pharmaceutical product(s).
+                                You are about to delete {products.filter(p => p.category === 'pharmaceutical').length} rolling bearing product(s).
                               </p>
                               <p className="text-sm text-gray-600">
-                                This will remove all products in the Pharmaceutical category.
+                                This will remove all products in the Rolling Bearings category.
                               </p>
                             </div>
                           )}
