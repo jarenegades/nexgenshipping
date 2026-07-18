@@ -79,18 +79,19 @@ export function CategoryManagementPanel() {
     <Card>
       <CardHeader>
         <CardTitle>Category Management</CardTitle>
-        <CardDescription>Create bearing categories for the shop menu. Archiving hides a category without removing historical product links.</CardDescription>
+        <CardDescription>Create and manage the product categories shown in the storefront menu. Select a parent department to create a subcategory.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <div className="rounded-lg border bg-slate-50 p-4">
-          <h3 className="font-medium text-[#003366] mb-4">Add a category</h3>
+          <h3 className="font-medium text-[#003366] mb-1">Create a new category or subcategory</h3>
+          <p className="mb-4 text-sm text-slate-600">Choose the parent department where this category should appear in the shop menu.</p>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2"><Label htmlFor="category-name">Category name</Label><Input id="category-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Insert Bearings" /></div>
-            <div className="grid gap-2"><Label>Department</Label><Select value={parentId} onValueChange={setParentId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{groups.map((group) => <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="grid gap-2"><Label htmlFor="category-name">New category name</Label><Input id="category-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Insert Bearings" /></div>
+            <div className="grid gap-2"><Label>Parent department</Label><Select value={parentId} onValueChange={setParentId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{groups.map((group) => <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>)}</SelectContent></Select></div>
             <div className="grid gap-2"><Label htmlFor="category-description">Description (optional)</Label><Textarea id="category-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Short customer-facing description" /></div>
             <div className="grid gap-2"><Label htmlFor="category-order">Display order</Label><Input id="category-order" type="number" value={order} onChange={(event) => setOrder(event.target.value)} /></div>
           </div>
-          <Button className="mt-4 bg-[#003366] hover:bg-[#004488]" onClick={addCategory} disabled={saving}><FolderPlus className="mr-2 h-4 w-4" />Add Category</Button>
+          <Button className="mt-4 bg-[#003366] hover:bg-[#004488]" onClick={addCategory} disabled={saving}><FolderPlus className="mr-2 h-4 w-4" />Create Category</Button>
         </div>
 
         <div className="space-y-5">

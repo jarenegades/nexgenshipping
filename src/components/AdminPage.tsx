@@ -75,6 +75,7 @@ export function AdminPage({
   const [adminCurrentPage, setAdminCurrentPage] = useState(1);
   const ADMIN_ITEMS_PER_PAGE = 20;
   const [catalogCategories, setCatalogCategories] = useState<StoreCategory[]>([]);
+  const [activeAdminTab, setActiveAdminTab] = useState('products');
 
   // CSV Upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -1334,7 +1335,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
           )}
         </div>
 
-        <Tabs defaultValue="products" className="space-y-6">
+        <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="space-y-6">
           <TabsList className="flex flex-wrap gap-2 h-auto bg-gray-100 p-2">
             <TabsTrigger value="products" className="flex-shrink-0">
               <Package className="h-4 w-4 mr-2" />
@@ -1400,13 +1401,18 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                       <CardTitle>Product Management</CardTitle>
                       <CardDescription>Add, edit, or remove products from your catalog</CardDescription>
                     </div>
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-[#DC143C] hover:bg-[#B01030]">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Product
-                        </Button>
-                      </DialogTrigger>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button variant="outline" className="border-[#003366] text-[#003366] hover:bg-blue-50" onClick={() => setActiveAdminTab('categories')}>
+                        <Layers3 className="h-4 w-4 mr-2" />
+                        Manage Categories
+                      </Button>
+                      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-[#DC143C] hover:bg-[#B01030]">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Product
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Add New Product</DialogTitle>
@@ -1651,7 +1657,8 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                           </Button>
                         </div>
                       </DialogContent>
-                    </Dialog>
+                      </Dialog>
+                    </div>
 
                     {/* Edit Product Dialog */}
                     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
