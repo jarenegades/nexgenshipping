@@ -11,7 +11,7 @@ import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
-import { Plus, Edit, Trash2, Package, Tag, TrendingUp, Percent, Search, Filter, Upload, Download, FileUp, CheckCircle2, AlertCircle, XCircle, Link2, Image, Users, CreditCard, Settings, RefreshCw, ChevronLeft, ChevronRight, DollarSign, Bell, Layers3 } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Tag, TrendingUp, Percent, Search, Filter, Upload, Download, FileUp, CheckCircle2, AlertCircle, XCircle, Link2, Image, Users, CreditCard, Settings, RefreshCw, ChevronLeft, ChevronRight, DollarSign, Bell, Layers3, Truck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { SupabaseStatus } from './SupabaseStatus';
@@ -27,6 +27,7 @@ import { Switch } from './ui/switch';
 import { publicAnonKey, supabaseUrl } from '../utils/supabase/info';
 import { PRODUCT_CATEGORIES } from './CategoryBrowser';
 import { CategoryManagementPanel } from './CategoryManagementPanel';
+import { ShippingSettingsPanel } from './ShippingSettingsPanel';
 import {
   orderNotificationSettingsService,
   OrderNotificationSettings,
@@ -1377,6 +1378,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
               <DollarSign className="h-4 w-4 mr-2" />
               Currency
             </TabsTrigger>
+            <TabsTrigger value="shipping-settings" className="flex-shrink-0">
+              <Truck className="h-4 w-4 mr-2" />
+              Shipping
+            </TabsTrigger>
             <TabsTrigger value="bulk-upload" className="flex-shrink-0">
               <Upload className="h-4 w-4 mr-2" />
               Bulk Upload
@@ -2079,6 +2084,10 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
 
           <TabsContent value="categories">
             <CategoryManagementPanel />
+          </TabsContent>
+
+          <TabsContent value="shipping-settings">
+            <ShippingSettingsPanel />
           </TabsContent>
 
           {/* Badges Tab */}

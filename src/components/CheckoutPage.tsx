@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { Stripe } from '@stripe/stripe-js';
@@ -18,6 +19,7 @@ import { authService } from '../utils/authService';
 import { cartService } from '../utils/cartService';
 import { ordersService } from '../utils/ordersService';
 import { orderNotificationService } from '../utils/orderNotificationService';
+import { ShippingMethod, shippingMethodsService } from '../utils/shippingMethodsService';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
@@ -31,6 +33,7 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [shippingMethod, setShippingMethod] = useState('standard');
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [clientSecret, setClientSecret] = useState('');
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [isPreparingPayment, setIsPreparingPayment] = useState(false);
@@ -57,16 +60,24 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
     return sum + convertedPrice * item.quantity;
   }, 0);
   const tax = subtotal * 0.08;
-  const shippingThreshold = convertCurrency(50, 'USD', selectedCurrency);
-  const shippingBase = convertCurrency(9.99, 'USD', selectedCurrency);
-  const shippingExpress = convertCurrency(19.99, 'USD', selectedCurrency);
-  const shippingOvernight = convertCurrency(39.99, 'USD', selectedCurrency);
-  const shippingCost = shippingMethod === 'express' 
-    ? shippingExpress 
-    : shippingMethod === 'overnight' 
-      ? shippingOvernight 
-      : subtotal > shippingThreshold ? 0 : shippingBase;
+  const selectedShippingMethod = shippingMethods.find((method) => method.code === shippingMethod) || shippingMethods[0];
+  const shippingThreshold = selectedShippingMethod?.free_shipping_threshold == null
+    ? null
+    : convertCurrency(selectedShippingMethod.free_shipping_threshold, 'USD', selectedCurrency);
+  const shippingBase = convertCurrency(selectedShippingMethod?.price || 0, 'USD', selectedCurrency);
+  const shippingCost = shippingThreshold !== null && subtotal >= shippingThreshold ? 0 : shippingBase;
   const total = subtotal + tax + shippingCost;
+
+  useEffect(() => {
+    shippingMethodsService.getActive()
+      .then((methods) => {
+        setShippingMethods(methods);
+        if (methods.length > 0 && !methods.some((method) => method.code === shippingMethod)) {
+          setShippingMethod(methods[0].code);
+        }
+      })
+      .catch((error) => console.error('Could not load shipping methods:', error));
+  }, []);
 
   const handleShippingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,44 +366,15 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
                 <div>
                   <h3 className="text-[#003366] mb-4">Shipping Method</h3>
                   <RadioGroup value={shippingMethod} onValueChange={setShippingMethod}>
-                    <div className="flex items-center justify-between p-4 border rounded-lg mb-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="standard" id="standard" />
-                        <Label htmlFor="standard" className="cursor-pointer">
-                          <div>
-                            <p className="font-semibold">Standard Shipping</p>
-                            <p className="text-sm text-gray-500">5-7 business days</p>
-                          </div>
-                        </Label>
-                      </div>
-                      <span className="font-semibold">
-                        {subtotal > shippingThreshold ? 'FREE' : formatCurrency(shippingBase, selectedCurrency)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg mb-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="express" id="express" />
-                        <Label htmlFor="express" className="cursor-pointer">
-                          <div>
-                            <p className="font-semibold">Express Shipping</p>
-                            <p className="text-sm text-gray-500">2-3 business days</p>
-                          </div>
-                        </Label>
-                      </div>
-                      <span className="font-semibold">$19.99</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="overnight" id="overnight" />
-                        <Label htmlFor="overnight" className="cursor-pointer">
-                          <div>
-                            <p className="font-semibold">Overnight Shipping</p>
-                            <p className="text-sm text-gray-500">Next business day</p>
-                          </div>
-                        </Label>
-                      </div>
-                      <span className="font-semibold">$39.99</span>
-                    </div>
+                    {shippingMethods.map((method) => {
+                      const methodThreshold = method.free_shipping_threshold == null ? null : convertCurrency(method.free_shipping_threshold, 'USD', selectedCurrency);
+                      const methodPrice = convertCurrency(method.price, 'USD', selectedCurrency);
+                      const isFree = methodThreshold !== null && subtotal >= methodThreshold;
+                      return <div key={method.code} className="flex items-center justify-between p-4 border rounded-lg mb-2">
+                        <div className="flex items-center space-x-2"><RadioGroupItem value={method.code} id={method.code} /><Label htmlFor={method.code} className="cursor-pointer"><div><p className="font-semibold">{method.name}</p><p className="text-sm text-gray-500">{method.estimated_delivery}</p></div></Label></div>
+                        <span className="font-semibold">{isFree ? 'FREE' : formatCurrency(methodPrice, selectedCurrency)}</span>
+                      </div>;
+                    })}
                   </RadioGroup>
                 </div>
 
@@ -479,7 +461,7 @@ export function CheckoutPage({ cartItems, onUpdateQuantity, onRemoveItem, onOrde
                   <p>{shippingInfo.address}</p>
                   <p>{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
                   <p className="text-gray-600 pt-2">
-                    Shipping: {shippingMethod === 'standard' ? 'Standard' : shippingMethod === 'express' ? 'Express' : 'Overnight'}
+                    Shipping: {selectedShippingMethod?.name || shippingMethod}
                   </p>
                 </div>
               </div>
