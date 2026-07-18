@@ -1935,8 +1935,8 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                             </TableCell>
                             <TableCell>
                               <div className="text-sm">
-                                <div className="capitalize">{product.category}</div>
-                                <div className="text-gray-500">{product.categoryId || 'N/A'}</div>
+                                <div>{getCategoryName(product.category)}</div>
+                                <div className="text-gray-500">{getCategoryName(product.categoryId || '')}</div>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -2096,7 +2096,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                           )}
                           <div>
                             <div className="font-medium">{product.name}</div>
-                            <div className="text-sm text-gray-500 capitalize">{product.category}</div>
+                            <div className="text-sm text-gray-500">{getCategoryName(product.category)}</div>
                           </div>
                         </div>
 
@@ -2604,7 +2604,7 @@ Product Name Only Example - All Other Fields Optional!,,,,,,,,,,,,`;
                                   </TableCell>
                                   <TableCell>
                                     <div className="text-sm">
-                                      <div className="capitalize">{product.category}</div>
+                                      <div>{getCategoryName(product.category)}</div>
                                       <div className="text-gray-500 text-xs">{getCategoryName(product.categoryId)}</div>
                                     </div>
                                   </TableCell>

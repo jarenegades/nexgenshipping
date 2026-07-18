@@ -1,8 +1,6 @@
 import { supabase } from './supabaseClient';
 import { Product } from '../components/ProductCard';
 import { config } from './config';
-import { bearingCategoryIds, bearingCopyFor, bearingImageFor } from './bearingCatalog';
-import { showcaseProducts } from '../data/showcaseProducts';
 import { commerceSettingsService } from './commerceSettingsService';
 
 const applyPricingSettings = async (products: Product[]): Promise<Product[]> => {
@@ -46,25 +44,6 @@ export const productsService = {
     search?: string;
     sortBy?: 'newest' | 'price-low' | 'price-high' | 'rating';
   }): Promise<{ products: Product[]; count: number }> {
-    const page = options.page || 1;
-    const limit = options.limit || 20;
-    let products = showcaseProducts.filter((product) => {
-      if (options.category && options.category !== 'all' && product.category !== options.category) return false;
-      if (options.categoryId && product.categoryId !== options.categoryId) return false;
-      if (options.subcategoryId && product.subcategoryId !== options.subcategoryId) return false;
-      if (options.search) {
-        const query = options.search.toLowerCase();
-        return product.name.toLowerCase().includes(query) || product.description?.toLowerCase().includes(query);
-      }
-      return true;
-    });
-
-    if (options.sortBy === 'price-low') products = [...products].sort((a, b) => a.price - b.price);
-    if (options.sortBy === 'price-high') products = [...products].sort((a, b) => b.price - a.price);
-    if (options.sortBy === 'rating') products = [...products].sort((a, b) => b.rating - a.rating);
-
-    return { products: await applyPricingSettings(products.slice((page - 1) * limit, page * limit)), count: products.length };
-
     try {
       const page = options.page || 1;
       const limit = options.limit || 20;
@@ -82,9 +61,7 @@ export const productsService = {
         query = query.eq('category', options.category);
       }
 
-      const isBearingCategoryFilter = Boolean(options.categoryId && bearingCategoryIds.has(options.categoryId));
-
-      if (options.categoryId && !isBearingCategoryFilter) {
+      if (options.categoryId) {
         query = query.eq('category_id', options.categoryId);
       }
 
@@ -116,21 +93,6 @@ export const productsService = {
 
       // If showing all products without filters, fetch more to shuffle and select
       // This ensures good distribution across categories
-      if (isBearingCategoryFilter) {
-        const { data, error } = await query.order(orderBy, { ascending });
-        if (error) throw error;
-
-        const matchingProducts = (data || [])
-          .map(this.mapToProduct)
-          .filter((product) => product.categoryId === options.categoryId);
-        const start = (page - 1) * limit;
-
-        return {
-          products: matchingProducts.slice(start, start + limit),
-          count: matchingProducts.length,
-        };
-      }
-
       if (!isFiltered && options.category === 'all' && !options.sortBy) {
         const { data, count, error } = await query
           .order('created_at', { ascending: false });
@@ -147,7 +109,7 @@ export const productsService = {
         const paginatedProducts = shuffled.slice(start, end);
 
         return {
-          products: paginatedProducts,
+          products: await applyPricingSettings(paginatedProducts),
           count: count || 0
         };
       } else {
@@ -162,7 +124,7 @@ export const productsService = {
         if (error) throw error;
 
         return {
-          products: (data || []).map(this.mapToProduct),
+          products: await applyPricingSettings((data || []).map(this.mapToProduct)),
           count: count || 0
         };
       }
@@ -176,8 +138,6 @@ export const productsService = {
    * Fetch all active products from Supabase
    */
   async getAll(): Promise<Product[]> {
-    return applyPricingSettings(showcaseProducts);
-
     try {
       const { data, error } = await supabase
         .from('products')
@@ -189,7 +149,7 @@ export const productsService = {
       if (error) throw error;
 
       // Map Supabase data to Product interface
-      return (data || []).map(this.mapToProduct);
+      return applyPricingSettings((data || []).map(this.mapToProduct));
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;
@@ -200,9 +160,6 @@ export const productsService = {
    * Get a single product by ID
    */
   async getById(id: string): Promise<Product | null> {
-    const product = showcaseProducts.find((item) => item.id === id) || null;
-    return product ? (await applyPricingSettings([product]))[0] : null;
-
     try {
       const { data, error } = await supabase
         .from('products')
@@ -211,7 +168,7 @@ export const productsService = {
         .single();
 
       if (error) throw error;
-      return data ? this.mapToProduct(data) : null;
+      return data ? (await applyPricingSettings([this.mapToProduct(data)]))[0] : null;
     } catch (error) {
       console.error('Error fetching product:', error);
       return null;
@@ -628,11 +585,10 @@ export const productsService = {
    * Map Supabase product data to frontend Product interface
    */
   mapToProduct(data: any): Product {
-    const bearingCopy = bearingCopyFor(data.id);
     return {
       id: data.id,
-      name: bearingCopy.name,
-      description: bearingCopy.description,
+      name: data.name,
+      description: data.description || '',
       category: data.category,
       categoryId: data.category_id,
       subcategoryId: data.subcategory_id,
@@ -641,9 +597,9 @@ export const productsService = {
       currency: data.currency || 'USD',
       rating: Number(data.rating),
       reviewCount: data.review_count,
-      image: bearingImageFor(data.id),
+      image: data.image_url || '',
       inStock: data.in_stock,
-      badge: bearingCopy.badge || data.badge,
+      badge: data.badge,
       stockCount: data.stock_count,
       soldCount: data.sold_count,
       costPrice: data.cost_price ? Number(data.cost_price) : undefined,
