@@ -1,34 +1,42 @@
 import { createClient } from '@jsr/supabase__supabase-js';
-import { supabaseUrl, publicAnonKey } from './supabase/info';
+import { supabaseUrl, publicAnonKey, hasSupabaseConfig } from './supabase/info';
 
 const supabaseKey = publicAnonKey;
 
 // Log connection details for debugging
 console.log('🔵 Initializing Supabase client...');
-console.log('🔵 Supabase URL:', supabaseUrl);
-console.log('🔵 Anon Key (first 20 chars):', supabaseKey.substring(0, 20) + '...');
+console.log('🔵 Supabase URL:', supabaseUrl || 'not configured');
+console.log('🔵 Anon Key configured:', Boolean(supabaseKey));
 
-// Create client with auth options and storage configuration
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  },
-  db: {
-    schema: 'public'
-  },
-  // Storage configuration
-  storage: {
-    // Additional storage options can be configured here
+let supabaseClient: any = null;
+
+if (hasSupabaseConfig) {
+  try {
+    supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      },
+      global: {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      },
+      db: {
+        schema: 'public'
+      },
+      storage: {}
+    });
+
+    console.log('✅ Supabase client created with storage support');
+  } catch (error) {
+    console.error('⚠️ Failed to initialize Supabase client:', error);
   }
-});
+} else {
+  console.warn('⚠️ Supabase is not configured for this deployment. Falling back to local-only mode.');
+}
 
-console.log('✅ Supabase client created with storage support');
+export const supabase = supabaseClient;
 
